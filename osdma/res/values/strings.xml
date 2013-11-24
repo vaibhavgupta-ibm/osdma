@@ -4,5 +4,7 @@
     <string name="app_name">osdma</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="capture">Capture Photo</string>
+    <string name="captured_img">After user captures an image, it will be displayed here</string>
 
 </resources>
