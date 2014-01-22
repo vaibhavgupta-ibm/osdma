@@ -72,8 +72,8 @@ public class MainActivity extends Activity implements OnClickListener{
 	private ImageView capturedImage;
 	private static final Object CAPTURE_TAB_TEXT = "CAPTURE";
 	private static final Object GALLERY_TAB_TEXT = "GALLERY";
-	private static final String Photo_Post_URL = "http://119.81.38.147:3000/image"; 
-	private static final String User_Post_URL = "http://119.81.38.147:3000/user"; 
+	private static final String Photo_Post_URL = "http://119.81.38.147:8080/image"; 
+	private static final String User_Post_URL = "http://119.81.38.147:8080/user"; 
 	private ViewPager viewPager;
 	private ArrayList<Bitmap> bitmaps = new ArrayList<Bitmap>();
 	private ArrayList<ImageItem> data = new ArrayList<ImageItem>();
