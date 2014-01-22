@@ -499,6 +499,10 @@ public class MainActivity extends Activity implements OnClickListener{
 	private void launchCamera(){
 		//Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE); 
 		//startActivityForResult(cameraIntent, CAMERA_REQUEST);
+		if(!Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).exists()){
+			//Creating directory in sd card
+			Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).mkdir();
+		}
 		fileName = System.currentTimeMillis();
 		File imageDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME), ""+fileName+".jpg");
         String path = imageDirectory.toString().toLowerCase();
