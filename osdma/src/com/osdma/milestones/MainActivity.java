@@ -606,6 +606,7 @@ public class MainActivity extends Activity implements OnClickListener{
                         File file = new File(data.get(i).getTitle());
                         boolean deleted = file.delete();
                         System.out.println("Deleted: "+data.get(i).getTitle());
+                        customGridAdapter.remove(customGridAdapter.getItem(i));
                     }
                 }
                 if (cnt == 0){
@@ -620,10 +621,11 @@ public class MainActivity extends Activity implements OnClickListener{
                     
                     //Log.d("SelectedImages", selectImages);
                 }
-                final ArrayList<ImageItem> data = getData();
-                customGridAdapter = new GridViewAdapter(MainActivity.this, R.layout.row_grid, data);
-            	final boolean[] thumbnailsselection = customGridAdapter.getThumbnailsSelection();
-            	gridView.setAdapter(customGridAdapter);
+                customGridAdapter.notifyDataSetChanged();
+//                final ArrayList<ImageItem> data = getData();
+//                customGridAdapter = new GridViewAdapter(MainActivity.this, R.layout.row_grid, data);
+//            	final boolean[] thumbnailsselection = customGridAdapter.getThumbnailsSelection();
+//            	gridView.setAdapter(customGridAdapter);
             }
            
         });
