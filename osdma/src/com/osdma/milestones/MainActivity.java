@@ -545,9 +545,9 @@ public class MainActivity extends Activity implements OnClickListener{
 			}*/
         }  
 	}
-	
+	GridView gridView;
 	private void setImageGrid(View view){
-    	GridView gridView = (GridView)view.findViewById(R.id.imageGrid);
+    	gridView = (GridView)view.findViewById(R.id.imageGrid);
     	final ArrayList<ImageItem> data = getData();
     	customGridAdapter = new GridViewAdapter(this, R.layout.row_grid, data);
     	final boolean[] thumbnailsselection = customGridAdapter.getThumbnailsSelection();
@@ -620,7 +620,12 @@ public class MainActivity extends Activity implements OnClickListener{
                     
                     //Log.d("SelectedImages", selectImages);
                 }
+                final ArrayList<ImageItem> data = getData();
+                customGridAdapter = new GridViewAdapter(MainActivity.this, R.layout.row_grid, data);
+            	final boolean[] thumbnailsselection = customGridAdapter.getThumbnailsSelection();
+            	gridView.setAdapter(customGridAdapter);
             }
+           
         });
     }
     
