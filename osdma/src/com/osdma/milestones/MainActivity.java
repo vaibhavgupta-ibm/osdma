@@ -3,9 +3,12 @@ package com.osdma.milestones;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -16,6 +19,7 @@ import org.apache.http.params.HttpParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.R.integer;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.AlertDialog.Builder;
@@ -265,7 +269,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		public void onTabSelected(Tab tab, FragmentTransaction ft) {
 			// TODO Auto-generated method stub
 			if(tab.getText().equals(CAPTURE_TAB_TEXT)){
-				setPagerAdapter();
+//				setPagerAdapter();
 				viewPager.setCurrentItem(0);
 			}else if(tab.getText().equals(GALLERY_TAB_TEXT)){
 				viewPager.setCurrentItem(1);
@@ -445,11 +449,57 @@ public class MainActivity extends Activity implements OnClickListener{
 			launchCamera();
 			break;
 
+		case R.id.deleteBtn:
+			deleteSelectedImage();
+			break;
 		default:
 			break;
 		}
 	}
 	
+	private void deleteSelectedImage(){
+        // TODO Auto-generated method stub     
+		thumbnailsselection = customGridAdapter.getThumbnailsSelection();
+        final int len = thumbnailsselection.length;
+        ArrayList<Boolean> thumbnailList = new ArrayList<Boolean>();
+        int cnt = 0;
+        System.out.println("deleteSelectedImage : " + data.size());
+        for (int i =len-1; i>=0; i--)
+        {
+        	System.out.println("thumbnailsselection : " + i + " : "+ thumbnailsselection[i]);
+            if (thumbnailsselection[i]){
+                cnt++;
+                File file = new File(data.get(i).getTitle());
+                boolean deleted = file.delete();
+                System.out.println("Deleted: "+data.get(i).getTitle());
+                customGridAdapter.remove(customGridAdapter.getItem(i));
+                
+            }else{
+            	thumbnailList.add(false);
+            }
+        }
+        if (cnt == 0){
+            Toast.makeText(getApplicationContext(),
+                    "Please select at least one image",
+                    Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getApplicationContext(),
+                    "You've selected Total " + cnt + " image(s). We are Deleting Photos",
+                    Toast.LENGTH_LONG).show();
+            //Log.d("SelectedImages", selectImages);
+        }
+        boolean[] newArray = new boolean[thumbnailsselection.length-cnt];
+        int newArrayIndex = 0;
+        for (int index = 0; index < thumbnailsselection.length; index++) {
+			if(!thumbnailsselection[index]){
+				newArray[newArrayIndex] = thumbnailsselection[index];
+				newArrayIndex++;
+			}
+		}
+        thumbnailsselection = newArray;
+        customGridAdapter.setThumbnailsSelection(thumbnailsselection);
+        gridView.setAdapter(customGridAdapter);
+	}
 	private void openSettings(){
 			final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 			LinearLayout set = new LinearLayout(this);
@@ -531,28 +581,14 @@ public class MainActivity extends Activity implements OnClickListener{
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {  
 			util.addImage(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).getPath()+"/"+fileName+".jpg", ""+latitude, ""+longitude);
-            /*Bitmap photo = (Bitmap) data.getExtras().get("data"); 
-            System.out.println("Width : " + photo.getWidth());
-            System.out.println("Height : " + photo.getHeight());
-            System.out.println("Pictures path : " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
-            //capturedImage.setImageBitmap(Bitmap.createScaledBitmap(photo, photo.getWidth()*2, photo.getHeight()*2, true));
-            try {
-				String file_name = util.createImageFile(photo, FOLDER_NAME, FILE_EXTENSION);
-				util.addImage(context, file_name, ""+latitude, ""+longitude);				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
+            getData();
         }  
 	}
 	GridView gridView;
+	boolean[] thumbnailsselection; 
 	private void setImageGrid(View view){
     	gridView = (GridView)view.findViewById(R.id.imageGrid);
-    	final ArrayList<ImageItem> data = getData();
-    	customGridAdapter = new GridViewAdapter(this, R.layout.row_grid, data);
-    	final boolean[] thumbnailsselection = customGridAdapter.getThumbnailsSelection();
-    	gridView.setAdapter(customGridAdapter);
-    	
+    	getData();
     	//Button
     	Button selectBtn = (Button)view.findViewById(R.id.selectBtn);
         selectBtn.setOnClickListener(new OnClickListener() {
@@ -592,64 +628,62 @@ public class MainActivity extends Activity implements OnClickListener{
         });
         
         Button deleteBtn = (Button)view.findViewById(R.id.deleteBtn);
-        deleteBtn.setOnClickListener(new OnClickListener() {
- 
-            public void onClick(View v) {
-                // TODO Auto-generated method stub           	 
-                final int len = thumbnailsselection.length;
-                int cnt = 0;
-                
-                for (int i =0; i<len; i++)
-                {
-                    if (thumbnailsselection[i]){
-                        cnt++;
-                        File file = new File(data.get(i).getTitle());
-                        boolean deleted = file.delete();
-                        System.out.println("Deleted: "+data.get(i).getTitle());
-                        customGridAdapter.remove(customGridAdapter.getItem(i));
-                    }
-                }
-                if (cnt == 0){
-                    Toast.makeText(getApplicationContext(),
-                            "Please select at least one image",
-                            Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getApplicationContext(),
-                            "You've selected Total " + cnt + " image(s). We are Deleting Photos",
-                            Toast.LENGTH_LONG).show();
-                    
-                    
-                    //Log.d("SelectedImages", selectImages);
-                }
-                customGridAdapter.notifyDataSetChanged();
-//                final ArrayList<ImageItem> data = getData();
-//                customGridAdapter = new GridViewAdapter(MainActivity.this, R.layout.row_grid, data);
-//            	final boolean[] thumbnailsselection = customGridAdapter.getThumbnailsSelection();
-//            	gridView.setAdapter(customGridAdapter);
-            }
-           
-        });
+        deleteBtn.setOnClickListener(this);
     }
     
-    private ArrayList<ImageItem> getData() {
+    private void getData() {
 		// TODO Auto-generated method stub
+    	System.out.println("Inside getdata....");
     	if(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).exists() && Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).isDirectory()){
 	    	if(!data.isEmpty()){
 	    		data.clear();
 	    	}
 	    	File[] files = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).listFiles();
-	    	for (int index = 0; index < files.length; index++) {
-				if(!files[index].isDirectory()){
-					BitmapFactory.Options options = new BitmapFactory.Options();
-					options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-					Bitmap bitmap = BitmapFactory.decodeFile(files[index].getAbsolutePath(), options);
-					data.add(new ImageItem(bitmap, files[index].getAbsolutePath()));
-				}
-			}
+	    	ImageLoader imageLoader = new ImageLoader();
+	    	imageLoader.execute(files);
     	}
-    	return data;
+    	System.out.println("Data length : " + data.size());
+    	
 	}
 	
+    public class ImageLoader extends AsyncTask<File, Integer, ArrayList<ImageItem>>{
+
+    	
+		@Override
+		protected ArrayList<ImageItem> doInBackground(File... files) {
+			// TODO Auto-generated method stub
+			ArrayList<ImageItem> data = new ArrayList<ImageItem>();
+				for (int index = 0; index < files.length; index++) {
+					if(!files[index].isDirectory()){
+						System.out.println("Time : " + System.currentTimeMillis());
+						BitmapFactory.Options options = new BitmapFactory.Options();
+						options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+						options.inJustDecodeBounds = false;
+						options.inDither = true;
+						options.inSampleSize = 4;
+						Bitmap bitmap = BitmapFactory.decodeFile(files[index].getAbsolutePath(),options);
+						data.add(new ImageItem(bitmap, files[index].getAbsolutePath()));
+						
+						System.out.println("Time : " + System.currentTimeMillis());
+					}
+				}
+	    	return data;
+		}
+
+		@Override
+		protected void onPostExecute(ArrayList<ImageItem> result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			customGridAdapter = new GridViewAdapter(MainActivity.this, R.layout.row_grid, result);
+			thumbnailsselection = customGridAdapter.getThumbnailsSelection();
+			MainActivity.this.data = result;
+			gridView.setAdapter(customGridAdapter);
+		}
+		
+
+		
+    	
+    }
 	 
 	 //
 	 /*ImageHandler db = new ImageHandler(this);

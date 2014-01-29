@@ -5,6 +5,8 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,6 +37,10 @@ public class GridViewAdapter extends ArrayAdapter<ImageItem> {
         	return this.thumbnailsselection;
         }
 
+        public void setThumbnailsSelection(boolean[] thumbnailsSelection){
+        	this.thumbnailsselection = thumbnailsSelection;
+        }
+       
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
                 View row = convertView;
