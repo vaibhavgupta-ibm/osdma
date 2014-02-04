@@ -2,24 +2,14 @@ package com.osdma.milestones;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.R.integer;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.AlertDialog.Builder;
@@ -117,8 +107,7 @@ public class MainActivity extends Activity implements OnClickListener{
          {
              longitude = location.getLongitude();
              latitude = location.getLatitude();
-             System.out.println( "first lat long : "+latitude +" "+ longitude);
-             //new LoadPlaces().execute();
+             //System.out.println( "first lat long : "+latitude +" "+ longitude);
          }else
          {
              locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
@@ -175,7 +164,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			@Override
 			public void onPageSelected(int arg0) {
 				// TODO Auto-generated method stub
-				System.out.println("Inside onPageSelected....");
+				//System.out.println("Inside onPageSelected....");
 				if(arg0 == 0){
 					getActionBar().setSelectedNavigationItem(0);
 				}else if(arg0==1){
@@ -220,6 +209,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		public Object instantiateItem(ViewGroup container, int position) {
 			// TODO Auto-generated method stub
 			LinearLayout linearLayout = null;
+			
 			if(position==0){
 				linearLayout = (LinearLayout)getLayoutInflater().inflate(R.layout.capture_layout, null);
 				capturedImage = (ImageView)linearLayout.findViewById(R.id.capturedImage);
@@ -269,7 +259,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		public void onTabSelected(Tab tab, FragmentTransaction ft) {
 			// TODO Auto-generated method stub
 			if(tab.getText().equals(CAPTURE_TAB_TEXT)){
-//				setPagerAdapter();
+				//setPagerAdapter();
 				viewPager.setCurrentItem(0);
 			}else if(tab.getText().equals(GALLERY_TAB_TEXT)){
 				viewPager.setCurrentItem(1);
@@ -290,6 +280,8 @@ public class MainActivity extends Activity implements OnClickListener{
         
     	@Override
         protected String doInBackground(List<String>... images) {
+    		ImageHandler db = new ImageHandler(context);
+    		Image image = null;
     		String ImageLocation = null;
     		String temp = null;
     		ByteArrayOutputStream baos;
@@ -327,8 +319,8 @@ public class MainActivity extends Activity implements OnClickListener{
 						e.printStackTrace();
 					}
 					userjsonObjSend.put("sitename", settings.getString(SITENO, ""));
-					ImageHandler db = new ImageHandler(context);
-					Image image = db.get(ImageLocation);
+					//ImageHandler db = new ImageHandler(context);
+					image = db.get(ImageLocation);
 					//System.out.println(image.datetime);
 					imgjsonObjSend.put("photodata", temp);
 					imgjsonObjSend.put("username", settings.getString(USERNAME, ""));
@@ -368,8 +360,9 @@ public class MainActivity extends Activity implements OnClickListener{
 	 					}
 	 				});
 	        		 final String uploadStatus = jsonSend.SendHttpPost(Photo_Post_URL, imgjsonObjSend);
-	        		 if("Successfully uploaded photo".equals(uploadStatus)){
-	        			 
+	        		 if("Successfully uploaded photo".equals(uploadStatus)){	        			 
+	        			 image.issync = "true";
+	        			 System.out.println(db.update(image));
 	        		 }else{
 	        			 display(uploadStatus);
 	        		 }
@@ -448,25 +441,26 @@ public class MainActivity extends Activity implements OnClickListener{
 		case R.id.capturedImage:
 			launchCamera();
 			break;
-
+		
 		case R.id.deleteBtn:
-			deleteSelectedImage();
-			break;
+            deleteSelectedImage();
+            break;
+            
 		default:
 			break;
 		}
 	}
 	
 	private void deleteSelectedImage(){
-        // TODO Auto-generated method stub     
-		thumbnailsselection = customGridAdapter.getThumbnailsSelection();
+        // TODO Auto-generated method stub
+                thumbnailsselection = customGridAdapter.getThumbnailsSelection();
         final int len = thumbnailsselection.length;
         ArrayList<Boolean> thumbnailList = new ArrayList<Boolean>();
         int cnt = 0;
         System.out.println("deleteSelectedImage : " + data.size());
         for (int i =len-1; i>=0; i--)
         {
-        	System.out.println("thumbnailsselection : " + i + " : "+ thumbnailsselection[i]);
+                System.out.println("thumbnailsselection : " + i + " : "+ thumbnailsselection[i]);
             if (thumbnailsselection[i]){
                 cnt++;
                 File file = new File(data.get(i).getTitle());
@@ -475,7 +469,7 @@ public class MainActivity extends Activity implements OnClickListener{
                 customGridAdapter.remove(customGridAdapter.getItem(i));
                 
             }else{
-            	thumbnailList.add(false);
+                    thumbnailList.add(false);
             }
         }
         if (cnt == 0){
@@ -491,15 +485,16 @@ public class MainActivity extends Activity implements OnClickListener{
         boolean[] newArray = new boolean[thumbnailsselection.length-cnt];
         int newArrayIndex = 0;
         for (int index = 0; index < thumbnailsselection.length; index++) {
-			if(!thumbnailsselection[index]){
-				newArray[newArrayIndex] = thumbnailsselection[index];
-				newArrayIndex++;
-			}
-		}
+                        if(!thumbnailsselection[index]){
+                                newArray[newArrayIndex] = thumbnailsselection[index];
+                                newArrayIndex++;
+                        }
+                }
         thumbnailsselection = newArray;
         customGridAdapter.setThumbnailsSelection(thumbnailsselection);
         gridView.setAdapter(customGridAdapter);
-	}
+    }
+	
 	private void openSettings(){
 			final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 			LinearLayout set = new LinearLayout(this);
@@ -550,11 +545,12 @@ public class MainActivity extends Activity implements OnClickListener{
 		//Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE); 
 		//startActivityForResult(cameraIntent, CAMERA_REQUEST);
 		if(!Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).exists()){
-			//Creating directory in sd card
-			Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).mkdir();
-		}
+		      //Creating directory in sd card
+		      Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).mkdir();
+	    }
 		fileName = System.currentTimeMillis();
 		File imageDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME), ""+fileName+".jpg");
+		
         String path = imageDirectory.toString().toLowerCase();
         String name = imageDirectory.getName().toLowerCase();
 
@@ -572,7 +568,6 @@ public class MainActivity extends Activity implements OnClickListener{
 
         i.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         startActivityForResult(i, CAMERA_REQUEST);
-        System.out.println(latitude+":"+longitude);
 	} 
     
 	@Override
@@ -582,13 +577,31 @@ public class MainActivity extends Activity implements OnClickListener{
 		if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {  
 			util.addImage(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).getPath()+"/"+fileName+".jpg", ""+latitude, ""+longitude);
             getData();
+			/*Bitmap photo = (Bitmap) data.getExtras().get("data"); 
+            System.out.println("Width : " + photo.getWidth());
+            System.out.println("Height : " + photo.getHeight());
+            System.out.println("Pictures path : " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
+            //capturedImage.setImageBitmap(Bitmap.createScaledBitmap(photo, photo.getWidth()*2, photo.getHeight()*2, true));
+            try {
+				String file_name = util.createImageFile(photo, FOLDER_NAME, FILE_EXTENSION);
+				util.addImage(context, file_name, ""+latitude, ""+longitude);				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
         }  
 	}
+	
 	GridView gridView;
 	boolean[] thumbnailsselection; 
 	private void setImageGrid(View view){
     	gridView = (GridView)view.findViewById(R.id.imageGrid);
+    	/*final ArrayList<ImageItem> data = getData();
+    	customGridAdapter = new GridViewAdapter(this, R.layout.row_grid, data);
+    	final boolean[] thumbnailsselection = customGridAdapter.getThumbnailsSelection();
+    	gridView.setAdapter(customGridAdapter);*/
     	getData();
+    	
     	//Button
     	Button selectBtn = (Button)view.findViewById(R.id.selectBtn);
         selectBtn.setOnClickListener(new OnClickListener() {
@@ -600,6 +613,9 @@ public class MainActivity extends Activity implements OnClickListener{
                             Toast.LENGTH_LONG).show();
             		return;
             	}
+            	/*customGridAdapter = new GridViewAdapter(context, R.layout.row_grid, getData());
+            	final boolean[] thumbnailsselection = customGridAdapter.getThumbnailsSelection();
+            	gridView.setAdapter(customGridAdapter);*/
                 // TODO Auto-generated method stub
             	List<String> nameValuePairs = new ArrayList<String>();           	 
                 final int len = thumbnailsselection.length;
@@ -624,76 +640,116 @@ public class MainActivity extends Activity implements OnClickListener{
                     new HttpAsyncTask().execute(nameValuePairs);
                     //Log.d("SelectedImages", selectImages);
                 }
+                //customGridAdapter.notifyDataSetChanged();
             }
         });
         
         Button deleteBtn = (Button)view.findViewById(R.id.deleteBtn);
         deleteBtn.setOnClickListener(this);
+        /*deleteBtn.setOnClickListener(new OnClickListener() {
+ 
+            public void onClick(View v) {
+                // TODO Auto-generated method stub           	 
+                final int len = thumbnailsselection.length;
+                int cnt = 0;
+                ImageHandler db = new ImageHandler(context);
+                
+                for (int i=len-1; i>=0; i--)
+                {
+                    if (thumbnailsselection[i]){
+                        cnt++;
+                        File file = new File(data.get(i).getTitle());
+                        boolean deleted = file.delete();
+                        //System.out.println(db.delete(data.get(i).getTitle()));
+                        System.out.println("Deleted: "+data.get(i).getTitle());
+                        customGridAdapter.remove(customGridAdapter.getItem(i));
+                    }
+                }
+
+                if (cnt == 0){
+                    Toast.makeText(getApplicationContext(),
+                            "Please select at least one image",
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            "You've selected Total " + cnt + " image(s). We are Deleting Photos",
+                            Toast.LENGTH_LONG).show();
+                    
+                    
+                    //Log.d("SelectedImages", selectImages);
+                }
+                customGridAdapter.notifyDataSetChanged();
+            }
+        });*/
     }
     
-    private void getData() {
+    /*private ArrayList<ImageItem> getData() {
 		// TODO Auto-generated method stub
-    	System.out.println("Inside getdata....");
     	if(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).exists() && Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).isDirectory()){
 	    	if(!data.isEmpty()){
 	    		data.clear();
 	    	}
 	    	File[] files = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).listFiles();
-	    	ImageLoader imageLoader = new ImageLoader();
-	    	imageLoader.execute(files);
+	    	for (int index = 0; index < files.length; index++) {
+				if(!files[index].isDirectory()){
+					BitmapFactory.Options options = new BitmapFactory.Options();
+					options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+					Bitmap bitmap = BitmapFactory.decodeFile(files[index].getAbsolutePath(), options);
+					data.add(new ImageItem(bitmap, files[index].getAbsolutePath()));
+				}
+			}
     	}
-    	System.out.println("Data length : " + data.size());
-    	
-	}
+    	return data;
+	}*/
 	
+	private void getData() {
+        // TODO Auto-generated method stub
+	    System.out.println("Inside getdata....");
+	    if(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).exists() && Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).isDirectory()){
+	         if(!data.isEmpty()){
+	                 data.clear();
+	         }
+	         File[] files = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+FOLDER_NAME).listFiles();
+	         ImageLoader imageLoader = new ImageLoader();
+	         imageLoader.execute(files);
+	    }
+	    System.out.println("Data length : " + data.size());
+	}
+    
     public class ImageLoader extends AsyncTask<File, Integer, ArrayList<ImageItem>>{
 
-    	
-		@Override
-		protected ArrayList<ImageItem> doInBackground(File... files) {
-			// TODO Auto-generated method stub
-			ArrayList<ImageItem> data = new ArrayList<ImageItem>();
-				for (int index = 0; index < files.length; index++) {
-					if(!files[index].isDirectory()){
-						System.out.println("Time : " + System.currentTimeMillis());
-						BitmapFactory.Options options = new BitmapFactory.Options();
-						options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-						options.inJustDecodeBounds = false;
-						options.inDither = true;
-						options.inSampleSize = 4;
-						Bitmap bitmap = BitmapFactory.decodeFile(files[index].getAbsolutePath(),options);
-						data.add(new ImageItem(bitmap, files[index].getAbsolutePath()));
-						
-						System.out.println("Time : " + System.currentTimeMillis());
-					}
-				}
-	    	return data;
-		}
+        
+        @Override
+        protected ArrayList<ImageItem> doInBackground(File... files) {
+                // TODO Auto-generated method stub
+                ArrayList<ImageItem> data = new ArrayList<ImageItem>();
+                        for (int index = 0; index < files.length; index++) {
+                                if(!files[index].isDirectory()){
+                                        //System.out.println("Time : " + System.currentTimeMillis());
+                                        BitmapFactory.Options options = new BitmapFactory.Options();
+                                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                                        options.inJustDecodeBounds = false;
+                                        options.inDither = true;
+                                        options.inSampleSize = 4;
+                                        Bitmap bitmap = BitmapFactory.decodeFile(files[index].getAbsolutePath(),options);
+                                        data.add(new ImageItem(bitmap, files[index].getAbsolutePath()));
+                                        
+                                        System.out.println("Time : " + System.currentTimeMillis());
+                                }
+                        }
+         return data;
+        }
 
-		@Override
-		protected void onPostExecute(ArrayList<ImageItem> result) {
-			// TODO Auto-generated method stub
-			super.onPostExecute(result);
-			customGridAdapter = new GridViewAdapter(MainActivity.this, R.layout.row_grid, result);
-			thumbnailsselection = customGridAdapter.getThumbnailsSelection();
-			MainActivity.this.data = result;
-			gridView.setAdapter(customGridAdapter);
-		}
-		
-
-		
-    	
+        @Override
+        protected void onPostExecute(ArrayList<ImageItem> result) {
+                // TODO Auto-generated method stub
+                super.onPostExecute(result);
+                customGridAdapter = new GridViewAdapter(MainActivity.this, R.layout.row_grid, result);
+                thumbnailsselection = customGridAdapter.getThumbnailsSelection();
+                MainActivity.this.data = result;
+                gridView.setAdapter(customGridAdapter);
+        }
+        
     }
-	 
-	 //
-	 /*ImageHandler db = new ImageHandler(this);
-	 db.add(new Image("Mustang", "red"));
-	 
-	 ArrayList<Car> cars = db.getAll();
-	 for(Car c: cars) {
-	    String data = "ID: "+c.id+", Brand: "+c.brand+", Color: "+c.color;
-	    Log.d("Car: ", data);
-	 }
-	 */
 	
 }

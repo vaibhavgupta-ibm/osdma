@@ -61,12 +61,6 @@ public class ImageHandler extends SQLiteOpenHelper {
 	public Image get(String image_location){
 		SQLiteDatabase db = this.getReadableDatabase();
 		String location = null;
-		/*ArrayList<Image> images = getAll();
-		 for(Image c: images) {
-		    String data = "ID: "+c.longitude+", Brand: "+c.lattitude+", Color: "+c.image_location;
-		    Log.d("Car: ", data);
-		    location = c.image_location;
-		 }*/
 		
 		Cursor cursor = db.query(IMAGE_TABLE, new String[] {KEY_ID, FIELD_IMAGE_LOCATION, FIELD_LATTITUDE, 
 				FIELD_LONGITUDE, FIELD_DATETIME, FIELD_ISSYNC }, FIELD_IMAGE_LOCATION + "=?",
@@ -75,11 +69,11 @@ public class ImageHandler extends SQLiteOpenHelper {
 	            null, // having
 	            null, // order by
 	            null); // limit
-		
-		if (cursor != null) cursor.moveToFirst();
-		String data = "ID: "+cursor.getString(0)+", Location: "+cursor.getString(1)+", latitude: "+cursor.getString(2)+", longitude: "+cursor.getString(3)+", date: "+cursor.getString(4)+", issync: "+cursor.getString(5);
-	    Log.d("Car: ", data);
-		    Image image = new Image(
+		Image image = new Image();
+		if (cursor !=null && cursor.moveToFirst() && cursor.getCount() > 0) {
+		//String data = "ID: "+cursor.getString(0)+", Location: "+cursor.getString(1)+", latitude: "+cursor.getString(2)+", longitude: "+cursor.getString(3)+", date: "+cursor.getString(4)+", issync: "+cursor.getString(5);
+	    //Log.d("Data: ", data);
+		    image = new Image(
 		    	Integer.parseInt(cursor.getString(0)),
 		    	cursor.getString(1),
 		    	cursor.getString(2),
@@ -87,6 +81,7 @@ public class ImageHandler extends SQLiteOpenHelper {
 		    	cursor.getString(4),
 		    	cursor.getString(5));
 		    cursor.close();
+		}
 		    db.close();
 		    return image;
 	}
@@ -96,23 +91,23 @@ public class ImageHandler extends SQLiteOpenHelper {
 	    SQLiteDatabase db = this.getWritableDatabase();
 
 	    ContentValues values = new ContentValues();
-	    values.put(FIELD_IMAGE_LOCATION, image.image_location);
-	    values.put(FIELD_LATTITUDE, image.lattitude);
-	    values.put(FIELD_LONGITUDE, image.longitude);
-	    values.put(FIELD_DATETIME, image.datetime);
-	    values.put(FIELD_LATTITUDE, image.issync);
+	    //values.put(FIELD_IMAGE_LOCATION, image.image_location);
+	    //values.put(FIELD_LATTITUDE, image.lattitude);
+	    //values.put(FIELD_LONGITUDE, image.longitude);
+	    //values.put(FIELD_DATETIME, image.datetime);
+	    values.put(FIELD_ISSYNC, image.issync);
 
 	    // updating row
-	    return db.update(IMAGE_TABLE, values, KEY_ID + " = ?",
-	            new String[] { String.valueOf(image.id) });
+	    return db.update(IMAGE_TABLE, values, FIELD_IMAGE_LOCATION + " = ?",
+	            new String[] { String.valueOf(image.image_location) });
 	}
 
-	public int delete(int id) {
+	public int delete(String image_location) {
 
 	    SQLiteDatabase db = this.getWritableDatabase();
 	    // deleting row
-	    return db.delete(IMAGE_TABLE, KEY_ID + " = ?",
-	        new String[] { String.valueOf(id) });
+	    return db.delete(IMAGE_TABLE, FIELD_IMAGE_LOCATION + " = ?",
+	        new String[] { image_location });
 
 	}
 	

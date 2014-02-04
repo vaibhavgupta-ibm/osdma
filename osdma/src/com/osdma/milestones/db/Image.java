@@ -18,5 +18,9 @@ public class Image {
         this.datetime = datetime;
         this.issync = issync;
     }
+    
+    public Image(){
+    	
+    }
 
 }
